@@ -211,7 +211,7 @@ mapL key = Lens insert_ (Map.lookup key)
     insert_ = \map val -> 
       case val of 
         Just v -> Map.insert key v map
-        Nothing -> map  
+        Nothing -> Map.delete key map  
 
 
 -- |
@@ -234,7 +234,7 @@ mapL key = Lens insert_ (Map.lookup key)
 -- >>> set (setL 33) (Set.fromList [1..5]) False
 -- fromList [1,2,3,4,5]
 setL :: Ord k => k -> Lens (Set k) Bool
-setL key = Lens (const . Set.insert key) (Set.member key)
+setL key = Lens (\s ins -> if ins then Set.insert key s else Set.delete key s) (Set.member key)
 
 
 -- |
