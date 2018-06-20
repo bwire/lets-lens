@@ -135,70 +135,35 @@ set l s b = getIdentity $ l (const $ Identity b) s
 -- | Observe that @foldMap@ can be recovered from @traverse@ using @Const@.
 --
 -- /Reminder:/ foldMap :: (Foldable t, Monoid b) => (a -> b) -> t a -> b
-foldMapT ::
-  (Traversable t, Monoid b) =>
-  (a -> b)
-  -> t a
-  -> b
-foldMapT =
-  error "todo: foldMapT"
+foldMapT :: (Traversable t, Monoid b) => (a -> b) -> t a -> b
+foldMapT f = getConst . traverse (Const . f) 
 
 -- | Let's refactor out the call to @traverse@ as an argument to @foldMapT@.
-foldMapOf ::
-  ((a -> Const r b) -> s -> Const r t)
-  -> (a -> r)
-  -> s
-  -> r
-foldMapOf =
-  error "todo: foldMapOf"
+foldMapOf :: ((a -> Const r b) -> s -> Const r t) -> (a -> r) -> s -> r
+foldMapOf t f = getConst . t (Const . f)
 
 -- | Here is @foldMapT@ again, passing @traverse@ to @foldMapOf@.
-foldMapTAgain ::
-  (Traversable t, Monoid b) =>
-  (a -> b)
-  -> t a
-  -> b
-foldMapTAgain =
-  error "todo: foldMapTAgain"
+foldMapTAgain :: (Traversable t, Monoid b) => (a -> b) -> t a -> b
+foldMapTAgain = foldMapOf traverse
 
 -- | Let's create a type-alias for this type of function.
-type Fold s t a b =
-  forall r.
-  Monoid r =>
-  (a -> Const r b)
-  -> s
-  -> Const r t
+type Fold s t a b = forall r. Monoid r => (a -> Const r b) -> s -> Const r t
 
 -- | Let's write an inverse to @foldMapOf@ that does the @Const@ wrapping &
 -- unwrapping.
-folds ::
-  ((a -> b) -> s -> t)
-  -> (a -> Const b a)
-  -> s
-  -> Const t s
-folds =
-  error "todo: folds"
+folds :: ((a -> b) -> s -> t) -> (a -> Const b a) -> s -> Const t s
+folds l = \f -> Const . l (getConst . f)
 
-folded ::
-  Foldable f =>
-  Fold (f a) (f a) a a
-folded =
-  error "todo: folded"
+folded :: Foldable f => Fold (f a) (f a) a a
+folded = \ff -> Const . foldMap (getConst . ff)
 
 ----
 
 -- | @Get@ is like @Fold@, but without the @Monoid@ constraint.
-type Get r s a =
-  (a -> Const r a)
-  -> s
-  -> Const r s
+type Get r s a = (a -> Const r a) -> s -> Const r s
 
-get ::
-  Get a s a
-  -> s
-  -> a
-get =
-  error "todo: get"
+get :: Get a s a -> s -> a
+get l = getConst . l Const
 
 ----
 
